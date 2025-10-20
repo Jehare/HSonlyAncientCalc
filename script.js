@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const calculateBtn = document.getElementById('calculateBtn');
     const resultsDiv = document.getElementById('results');
 
+
     // Add a click event listener to the button
     calculateBtn.addEventListener('click', () => {
 
@@ -14,19 +15,35 @@ document.addEventListener('DOMContentLoaded', () => {
         const hsString = hsInput.value;
         const chor = parseInt(chorInput.value) || 0;
 
+        // Chor must be an integer between 0 and 150
+        if (chor < 0 || chor > 150) {
+            resultsDiv.innerHTML = "<p style='color: red; text-align: center;'>Chor'gorloth can only be between 0 and 150.</p>";
+            return;
+        }
         // Parse the input
         const hsParts = hsString.split('e').map(part => parseFloat(part.trim()));
         if (hsParts.length !== 2 || hsParts.some(isNaN)) {
-            resultsDiv.innerHTML = "<p style='color: red;'>Invalid HS input. Please use scientific format.<br>Use at least 1e6 HS.</p>";
-            return;
+            //if input is a number but not in scientific notation, parse
+            if (!isNaN(parseFloat(hsString))) {
+                hsParts[0] = parseFloat(hsString);
+                hsParts[1] = 0;}
+            else{
+                resultsDiv.innerHTML = "<p style='color: red; text-align: center;'>Invalid HS input. Please use scientific format.<br>Use at least 1e6 HS.</p>";
+                return;}
         }
         const [mantissa, exponent] = hsParts;
         const initialLogHS = Math.log10(mantissa) + exponent;
 
-        // Calculate the "effective HS" log value
+        // Minimum 1000 HS so 3 logHS check
+        if (initialLogHS < 3) {
+            resultsDiv.innerHTML = "<p style='color: red; text-align: center;'>Enter at least 1e3 HS.<br>Pre-transcending (zone 300), follow<br>the pretrans ancient guide</p>";
+            return;
+        }
+
+        // Calculate the effective logHS per ancient (chorgorloth and dividing into 9 parts)
         const effectiveLogHS = initialLogHS - (chor * Math.log10(0.95)) - Math.log10(9);
 
-        // 3. Calculate the four final log results
+        // 3. Final ancient levels in log
         const log_r1 = effectiveLogHS / 2 + Math.log10(Math.sqrt(2));
         const log_r2 = effectiveLogHS / 2.5 + Math.log10(Math.pow(2.5, 0.4));
         const log_r3 = log_r1 - 2;
@@ -53,6 +70,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <label>Nogardnit:</label>
                 <input type="text" value="${results[3]}" readonly />
             </div>
+            <div>
+                <label>All remaining HS into Morgulis, should be lvl:</label>
+                <input type="text" value="${formatToScientificNotation(effectiveLogHS+Math.log10(2))}" readonly />
+            </div>
         `;
     });
 
@@ -61,6 +82,12 @@ document.addEventListener('DOMContentLoaded', () => {
      * Example: 50.301 -> "2.0e50"
      */
     function formatToScientificNotation(logValue) {
+        if (logValue < 0) {
+            return "0"; }
+        if (logValue < 4) {
+            // For small values, return as rounded integer
+            return Math.round(Math.pow(10, logValue)).toString();
+        }
         const exponent = Math.floor(logValue);
         const mantissa = Math.pow(10, logValue - exponent);
         return `${mantissa.toFixed(6)}e${exponent}`;
