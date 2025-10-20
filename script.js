@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 hsParts[0] = parseFloat(hsString);
                 hsParts[1] = 0;}
             else{
-                resultsDiv.innerHTML = "<p style='color: red; text-align: center;'>Invalid HS input. Please use scientific format.<br>Use at least 1e6 HS.</p>";
+                resultsDiv.innerHTML = "<p style='color: red; text-align: center;'>Invalid HS input. Please use scientific format.<br>Use at least 1e3 HS.</p>";
                 return;}
         }
         const [mantissa, exponent] = hsParts;
